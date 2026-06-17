@@ -210,7 +210,7 @@ class Game:
 
     def _new_game(self):
         self.score     = 0
-        self.lives     = 3
+        self.lives     = 1
         self.level     = 1
         self.state     = "playing"   # playing | paused | dead | won | gameover
         self.particles: list[Particle] = []
@@ -359,36 +359,33 @@ class Game:
         score_s = self.font_md.render(f"SCORE  {self.score}", True, WHITE)
         self.screen.blit(score_s, (16, 12))
 
-        # lives as small balls
-        lives_s = self.font_md.render("LIVES", True, GRAY)
-        self.screen.blit(lives_s, (SCREEN_WIDTH // 2 - 80, 12))
-        for i in range(self.lives):
-            pygame.draw.circle(self.screen, CYAN,
-                               (SCREEN_WIDTH // 2 + 10 + i * 22, 22), 8)
-
         lvl_s = self.font_md.render(f"LEVEL {self.level}", True, YELLOW)
         self.screen.blit(lvl_s, (SCREEN_WIDTH - lvl_s.get_width() - 16, 12))
 
-    def _draw_overlay(self, title, sub, hint):
+    def _draw_overlay(self, title, hint):
         veil = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
         veil.fill((0, 0, 0, 170))
         self.screen.blit(veil, (0, 0))
 
         cy = SCREEN_HEIGHT // 2
         t = self.font_xl.render(title, True, CYAN)
-        self.screen.blit(t, (SCREEN_WIDTH // 2 - t.get_width() // 2, cy - 80))
+        self.screen.blit(t, (SCREEN_WIDTH // 2 - t.get_width() // 2, cy - 100))
 
-        if sub:
-            s = self.font_lg.render(sub, True, WHITE)
-            self.screen.blit(s, (SCREEN_WIDTH // 2 - s.get_width() // 2, cy - 10))
+        score_label = self.font_lg.render("SCORE", True, GRAY)
+        score_num   = self.font_xl.render(str(self.score), True, YELLOW)
+        self.screen.blit(score_label, (SCREEN_WIDTH // 2 - score_label.get_width() // 2, cy - 30))
+        self.screen.blit(score_num,   (SCREEN_WIDTH // 2 - score_num.get_width()   // 2, cy + 10))
 
         h = self.font_sm.render(hint, True, GRAY)
-        self.screen.blit(h, (SCREEN_WIDTH // 2 - h.get_width() // 2, cy + 50))
+        self.screen.blit(h, (SCREEN_WIDTH // 2 - h.get_width() // 2, cy + 90))
 
     def _draw_launch_hint(self):
-        txt = self.font_sm.render("Press  X / Space  to launch", True, GRAY)
-        self.screen.blit(txt, (SCREEN_WIDTH // 2 - txt.get_width() // 2,
-                                self.paddle.y - 30))
+        big = self.font_lg.render("BREAK ALL THE BOXES TO WIN", True, CYAN)
+        self.screen.blit(big, (SCREEN_WIDTH // 2 - big.get_width() // 2,
+                                SCREEN_HEIGHT // 2 - 20))
+        hint = self.font_sm.render("Press  X  to start   |   Left stick to control", True, GRAY)
+        self.screen.blit(hint, (SCREEN_WIDTH // 2 - hint.get_width() // 2,
+                                 SCREEN_HEIGHT // 2 + 30))
 
     # ------------------------------------------------------------------- loop
 
@@ -440,15 +437,13 @@ class Game:
                 self._draw_launch_hint()
 
             if self.state == "paused":
-                self._draw_overlay("PAUSED", "",
+                self._draw_overlay("PAUSED",
                                    "P  or  Options  to resume")
             elif self.state == "gameover":
                 self._draw_overlay("GAME OVER",
-                                   f"Final Score:  {self.score}",
                                    "R  or  face button  to restart")
             elif self.state == "won":
                 self._draw_overlay("YOU WIN!",
-                                   f"Final Score:  {self.score}",
                                    "R  or  face button  to play again")
 
             pygame.display.flip()
